@@ -1,0 +1,107 @@
+package com.company;
+import java.io.*;
+import java.util.LinkedList;
+import java.util.Scanner;
+/**
+ *    Will check the amount of times an artist appears during a certain time period on spotify and will create a file with the results in alphabetical order
+ *    @author Anthony Ramanovich
+ *    @version 2.0 , 10/4/20
+ */
+
+public class Main {
+
+    public static void main(String[] args) throws IOException {
+        String[][] spotify = new String[200][5];
+        File file = new File("C:\\regional-global-daily-latest.csv");
+        Scanner in;
+        in = new Scanner(file);
+        in.nextLine();
+        in.nextLine();
+        for(int i = 0; i < 200; i++){
+            String line = in.nextLine();
+            String[] values = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+            for(int j = 0; j < 5; j++){
+                spotify[i][j] = values[j];
+            }
+        }
+        String[] names = new String[200];
+        int[] amount = new int[200];
+        int unique = -1;
+        for(int i = 0; i < 200; i++){
+            int check = contains(names, spotify[i][2]);
+            if(-1 == check){
+                unique++;
+                names[unique] = spotify[i][2];
+                amount[unique] += 1;
+            } else {
+                amount[check] += 1;
+            }
+        }
+        String[][] chart = new String[unique][2];
+        for(int i = 0; i < unique; i++){
+            int value = amount[i];
+            chart[i][0] = names[i];
+            chart[i][1] = Integer.toString(value);
+        }
+        for(int i = 0; i < chart.length; i++){
+            if (chart[i][0].charAt(0) == '"') {
+                chart[i][0] = chart[i][0].substring(1, chart[i][0].length() - 1);
+                }
+            }
+        sort(chart);
+        for (int i = 0; i < chart.length; i++){
+            System.out.printf("%-25s", chart[i][0]);
+            System.out.printf("%2s\n", chart[i][1]);
+        }
+        FileOutputStream out = new FileOutputStream("D:\\Spotify_9_5_2020.txt");
+        PrintStream f = new PrintStream(out);
+        for(int i = 0; i < chart.length; i++){
+            f.printf("%-25s", chart[i][0]);
+            f.printf("%2s\n", chart[i][1]);
+        }
+        LinkedList artists = new LinkedList();
+        LinkedList timesRepeated = new LinkedList();
+        for(int i = 0; i < chart.length; i++){
+            artists.add(chart[i][0]);
+            timesRepeated.add(chart[i][1]);
+        }
+    }
+    /**
+     * Checks if a certain artist is already in teh array
+     * @param array the array of artists
+     * @param name the name that is being checked for
+     * @return where the artist appears in the array or -1 if they do not appear
+     */
+    public static int contains(String[] array, String name){
+        for(int i = 0; i < 200; i++){
+            if (array[i] == null){
+                break;
+            }
+            if (0 == array[i].compareTo(name)){
+                return i;
+            }
+        }
+        return -1;
+    }
+    /**
+     * Sorts the array
+     * @param chart the array of artists
+     */
+    public static void sort(String[][] chart){
+        String temp;
+        for (int i = 0; i < chart.length; i++)
+        {
+            for (int j = i + 1; j < chart.length; j++) {
+                if (chart[i][0].compareToIgnoreCase(chart[j][0]) > 0)
+                {
+                    temp = chart[i][0];
+                    chart[i][0] = chart[j][0];
+                    chart[j][0] = temp;
+                    temp = chart[i][1];
+                    chart[i][1] = chart[j][1];
+                    chart[j][1] = temp;
+                }
+            }
+        }
+    }
+}
